@@ -16,7 +16,7 @@ app.layout = html.Div(
         "display": "flex",
         "flexDirection": "column",
         "alignItems": "center",
-        "fontFamily": "Arial, sans-serif" 
+        "fontFamily": "Arial, sans-serif",
     },
     children=[
         html.H1(
@@ -33,7 +33,7 @@ app.layout = html.Div(
                 "borderRadius": "10px",
                 "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.2)",
                 "color": "black",
-                "fontFamily": "Arial, sans-serif" 
+                "fontFamily": "Arial, sans-serif",
             },
             children=[
                 html.Div(
