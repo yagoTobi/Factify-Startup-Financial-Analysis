@@ -1,6 +1,6 @@
 # Import necessary libraries
 import dash
-from dash import html, dcc 
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
@@ -10,6 +10,7 @@ from plotly.subplots import make_subplots
 # Initialize the app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+
 def create_year_parameters(year, user_base=False):
     parameters = [
         html.H3(f"Year {year} Parameters"),
@@ -17,7 +18,18 @@ def create_year_parameters(year, user_base=False):
         dbc.Row(
             [
                 dbc.Col(html.Label("User Base" if user_base else "Growth (%)")),
-                dbc.Col(dbc.Input(id=f"year{year}_user_base" if user_base else f"year{year}_growth", type="number", value=1000 if user_base else 10, min=0)),
+                dbc.Col(
+                    dbc.Input(
+                        id=(
+                            f"year{year}_user_base"
+                            if user_base
+                            else f"year{year}_growth"
+                        ),
+                        type="number",
+                        value=1000 if user_base else 10,
+                        min=0,
+                    )
+                ),
             ],
             className="mb-3",
         ),
@@ -25,28 +37,62 @@ def create_year_parameters(year, user_base=False):
         dbc.Row(
             [
                 dbc.Col(html.Label("Basic Free Tier (%)")),
-                dbc.Col(dbc.Input(id=f"basic_tier{year}", type="number", value=85, min=0, max=100, step=0.01)),
+                dbc.Col(
+                    dbc.Input(
+                        id=f"basic_tier{year}",
+                        type="number",
+                        value=85,
+                        min=0,
+                        max=100,
+                        step=0.01,
+                    )
+                ),
             ],
             className="mb-3",
         ),
         dbc.Row(
             [
                 dbc.Col(html.Label("Curious Tier (%)")),
-                dbc.Col(dbc.Input(id=f"curious_tier{year}", type="number", value=10, min=0, max=100, step=0.01)),
+                dbc.Col(
+                    dbc.Input(
+                        id=f"curious_tier{year}",
+                        type="number",
+                        value=10,
+                        min=0,
+                        max=100,
+                        step=0.01,
+                    )
+                ),
             ],
             className="mb-3",
         ),
         dbc.Row(
             [
                 dbc.Col(html.Label("Oracle Tier (%)")),
-                dbc.Col(dbc.Input(id=f"oracle_tier{year}", type="number", value=5, min=0, max=100, step=0.01)),
+                dbc.Col(
+                    dbc.Input(
+                        id=f"oracle_tier{year}",
+                        type="number",
+                        value=5,
+                        min=0,
+                        max=100,
+                        step=0.01,
+                    )
+                ),
             ],
             className="mb-3",
         ),
         dbc.Row(
             [
                 dbc.Col(html.Label("Total (%)")),
-                dbc.Col(dbc.Input(id=f"total_percent_{year}", type="number", value=100, readonly=True)),
+                dbc.Col(
+                    dbc.Input(
+                        id=f"total_percent_{year}",
+                        type="number",
+                        value=100,
+                        readonly=True,
+                    )
+                ),
             ],
             className="mb-3",
         ),
@@ -82,14 +128,19 @@ def create_year_parameters(year, user_base=False):
     ]
     return parameters
 
+
 def create_metric_explanation():
     explanations = [
         html.H3("Metric Explanations"),
         html.P("User Base: Number of users in the first year."),
         html.P("Growth (%): Year-over-year growth percentage."),
         html.P("Basic Free Tier (%): Percentage of users in the Basic Free tier."),
-        html.P("Curious Tier (%): Percentage of users in the Curious tier (4.99 €/month)."),
-        html.P("Oracle Tier (%): Percentage of users in the Oracle tier (14.99 €/month)."),
+        html.P(
+            "Curious Tier (%): Percentage of users in the Curious tier (4.99 €/month)."
+        ),
+        html.P(
+            "Oracle Tier (%): Percentage of users in the Oracle tier (14.99 €/month)."
+        ),
         html.P("CPC (€/click): Cost Per Click for ads."),
         html.P("CPM (€/1000 impressions): Cost Per Thousand Impressions for ads."),
         html.P("CTR (%): Click-Through Rate for ads."),
@@ -97,10 +148,13 @@ def create_metric_explanation():
     ]
     return explanations
 
+
 # Define layout
 app.layout = dbc.Container(
     [
-        dcc.Store(id='tier-percentages-store', data={'basic': 85, 'curious': 10, 'oracle': 5}),
+        dcc.Store(
+            id="tier-percentages-store", data={"basic": 85, "curious": 10, "oracle": 5}
+        ),
         dbc.Row(
             [
                 dbc.Col(
@@ -115,22 +169,27 @@ app.layout = dbc.Container(
                     width=3,
                 ),
             ],
-            style={"height": "50%"}
+            style={"height": "50%"},
         ),
         dbc.Row(
             [
-                dbc.Col(create_year_parameters(1, user_base=True), width=2, className="border-end"),
+                dbc.Col(
+                    create_year_parameters(1, user_base=True),
+                    width=2,
+                    className="border-end",
+                ),
                 dbc.Col(create_year_parameters(2), width=2, className="border-end"),
                 dbc.Col(create_year_parameters(3), width=2, className="border-end"),
                 dbc.Col(create_year_parameters(4), width=2, className="border-end"),
                 dbc.Col(create_year_parameters(5), width=2, className="border-end"),
                 dbc.Col(create_metric_explanation(), width=2),
             ],
-            style={"height": "50%"}
+            style={"height": "50%"},
         ),
     ],
     fluid=True,
 )
+
 
 # Define callback to update the chart
 # Define callback to update the chart and revenue/user display
@@ -180,17 +239,46 @@ app.layout = dbc.Container(
     ],
 )
 def update_chart(
-    year1_user_base, year2_growth, year3_growth, year4_growth, year5_growth,
-    basic_tier1, curious_tier1, oracle_tier1,
-    cpc1, cpm1, ctr1, arpu1,
-    basic_tier2, curious_tier2, oracle_tier2,
-    cpc2, cpm2, ctr2, arpu2,
-    basic_tier3, curious_tier3, oracle_tier3,
-    cpc3, cpm3, ctr3, arpu3,
-    basic_tier4, curious_tier4, oracle_tier4,
-    cpc4, cpm4, ctr4, arpu4,
-    basic_tier5, curious_tier5, oracle_tier5,
-    cpc5, cpm5, ctr5, arpu5,
+    year1_user_base,
+    year2_growth,
+    year3_growth,
+    year4_growth,
+    year5_growth,
+    basic_tier1,
+    curious_tier1,
+    oracle_tier1,
+    cpc1,
+    cpm1,
+    ctr1,
+    arpu1,
+    basic_tier2,
+    curious_tier2,
+    oracle_tier2,
+    cpc2,
+    cpm2,
+    ctr2,
+    arpu2,
+    basic_tier3,
+    curious_tier3,
+    oracle_tier3,
+    cpc3,
+    cpm3,
+    ctr3,
+    arpu3,
+    basic_tier4,
+    curious_tier4,
+    oracle_tier4,
+    cpc4,
+    cpm4,
+    ctr4,
+    arpu4,
+    basic_tier5,
+    curious_tier5,
+    oracle_tier5,
+    cpc5,
+    cpm5,
+    ctr5,
+    arpu5,
 ):
     # Calculate user base for each year
     user_base = [year1_user_base]
@@ -209,9 +297,9 @@ def update_chart(
         (basic_tier2, curious_tier2, oracle_tier2),
         (basic_tier3, curious_tier3, oracle_tier3),
         (basic_tier4, curious_tier4, oracle_tier4),
-        (basic_tier5, curious_tier5, oracle_tier5)
+        (basic_tier5, curious_tier5, oracle_tier5),
     ]
-    
+
     cpc = [cpc1, cpc2, cpc3, cpc4, cpc5]
     cpm = [cpm1, cpm2, cpm3, cpm4, cpm5]
     ctr = [ctr1, ctr2, ctr3, ctr4, ctr5]
@@ -235,20 +323,73 @@ def update_chart(
         ad_revenue.append(revenue)
 
     # Total revenue
-    total_revenue = [sub_rev + ad_rev for sub_rev, ad_rev in zip(subscription_revenue, ad_revenue)]
+    total_revenue = [
+        sub_rev + ad_rev for sub_rev, ad_rev in zip(subscription_revenue, ad_revenue)
+    ]
 
     # Create stacked bar chart with line graph
     years = ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"]
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    
+
     # Add bars for subscription tiers and ad revenue
-    fig.add_trace(go.Bar(name="Basic Users", x=years, y=basic_users, text=basic_users, textposition='inside', insidetextanchor='middle'), secondary_y=False)
-    fig.add_trace(go.Bar(name="Curious Users", x=years, y=curious_users, text=curious_users, textposition='inside', insidetextanchor='middle'), secondary_y=False)
-    fig.add_trace(go.Bar(name="Oracle Users", x=years, y=oracle_users, text=oracle_users, textposition='inside', insidetextanchor='middle'), secondary_y=False)
-    fig.add_trace(go.Bar(name="Ad Revenue", x=years, y=ad_revenue, text=ad_revenue, textposition='inside', insidetextanchor='middle'), secondary_y=False)
-    
+    fig.add_trace(
+        go.Bar(
+            name="Basic Users",
+            x=years,
+            y=basic_users,
+            text=basic_users,
+            textposition="inside",
+            insidetextanchor="middle",
+        ),
+        secondary_y=False,
+    )
+    fig.add_trace(
+        go.Bar(
+            name="Curious Users",
+            x=years,
+            y=curious_users,
+            text=curious_users,
+            textposition="inside",
+            insidetextanchor="middle",
+        ),
+        secondary_y=False,
+    )
+    fig.add_trace(
+        go.Bar(
+            name="Oracle Users",
+            x=years,
+            y=oracle_users,
+            text=oracle_users,
+            textposition="inside",
+            insidetextanchor="middle",
+        ),
+        secondary_y=False,
+    )
+    fig.add_trace(
+        go.Bar(
+            name="Ad Revenue",
+            x=years,
+            y=ad_revenue,
+            text=ad_revenue,
+            textposition="inside",
+            insidetextanchor="middle",
+        ),
+        secondary_y=False,
+    )
+
     # Add single line for total revenue
-    fig.add_trace(go.Scatter(name="Total Revenue", x=years, y=total_revenue, mode='lines+markers+text', text=[f"€{x:.2f}" for x in total_revenue], textposition='top right', line=dict(color='black')), secondary_y=True)
+    fig.add_trace(
+        go.Scatter(
+            name="Total Revenue",
+            x=years,
+            y=total_revenue,
+            mode="lines+markers+text",
+            text=[f"€{x:.2f}" for x in total_revenue],
+            textposition="top right",
+            line=dict(color="black"),
+        ),
+        secondary_y=True,
+    )
 
     # Update layout
     fig.update_layout(
@@ -261,11 +402,14 @@ def update_chart(
 
     # Create revenue and user display
     revenue_user_display = [
-        html.P(f"Year {i+1}: Total Revenue: €{total_revenue[i]:,.2f}, Total Users: {int(user_base[i])}")
+        html.P(
+            f"Year {i+1}: Total Revenue: €{total_revenue[i]:,.2f}, Total Users: {int(user_base[i])}"
+        )
         for i in range(5)
     ]
 
     return fig, revenue_user_display
+
 
 # Run the app
 if __name__ == "__main__":
