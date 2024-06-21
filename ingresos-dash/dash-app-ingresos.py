@@ -10,331 +10,121 @@ from plotly.subplots import make_subplots
 # Initialize the app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+def create_year_parameters(year, user_base=False):
+    parameters = [
+        html.H3(f"Year {year} Parameters"),
+        html.H5("General Parameters"),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("User Base" if user_base else "Growth (%)")),
+                dbc.Col(dbc.Input(id=f"year{year}_user_base" if user_base else f"year{year}_growth", type="number", value=1000 if user_base else 10, min=0)),
+            ],
+            className="mb-3",
+        ),
+        html.H5("Subscription Revenue Parameters"),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("Basic Free Tier (%)")),
+                dbc.Col(dbc.Input(id=f"basic_tier{year}", type="number", value=85, min=0, max=100, step=0.01)),
+            ],
+            className="mb-3",
+        ),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("Curious Tier (%)")),
+                dbc.Col(dbc.Input(id=f"curious_tier{year}", type="number", value=10, min=0, max=100, step=0.01)),
+            ],
+            className="mb-3",
+        ),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("Oracle Tier (%)")),
+                dbc.Col(dbc.Input(id=f"oracle_tier{year}", type="number", value=5, min=0, max=100, step=0.01)),
+            ],
+            className="mb-3",
+        ),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("Total (%)")),
+                dbc.Col(dbc.Input(id=f"total_percent_{year}", type="number", value=100, readonly=True)),
+            ],
+            className="mb-3",
+        ),
+        html.H5("Ad Revenue Parameters"),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("CPC (€/click)")),
+                dbc.Col(dbc.Input(id=f"cpc{year}", type="number", value=0.5, min=0)),
+            ],
+            className="mb-3",
+        ),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("CPM (€/1000 impressions)")),
+                dbc.Col(dbc.Input(id=f"cpm{year}", type="number", value=5, min=0)),
+            ],
+            className="mb-3",
+        ),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("CTR (%)")),
+                dbc.Col(dbc.Input(id=f"ctr{year}", type="number", value=1, min=0)),
+            ],
+            className="mb-3",
+        ),
+        dbc.Row(
+            [
+                dbc.Col(html.Label("ARPU (€/user/month)")),
+                dbc.Col(dbc.Input(id=f"arpu{year}", type="number", value=0.75, min=0)),
+            ],
+            className="mb-3",
+        ),
+    ]
+    return parameters
+
+def create_metric_explanation():
+    explanations = [
+        html.H3("Metric Explanations"),
+        html.P("User Base: Number of users in the first year."),
+        html.P("Growth (%): Year-over-year growth percentage."),
+        html.P("Basic Free Tier (%): Percentage of users in the Basic Free tier."),
+        html.P("Curious Tier (%): Percentage of users in the Curious tier (4.99 €/month)."),
+        html.P("Oracle Tier (%): Percentage of users in the Oracle tier (14.99 €/month)."),
+        html.P("CPC (€/click): Cost Per Click for ads."),
+        html.P("CPM (€/1000 impressions): Cost Per Thousand Impressions for ads."),
+        html.P("CTR (%): Click-Through Rate for ads."),
+        html.P("ARPU (€/user/month): Average Revenue Per User per month."),
+    ]
+    return explanations
+
 # Define layout
 app.layout = dbc.Container(
     [
+        dcc.Store(id='tier-percentages-store', data={'basic': 85, 'curious': 10, 'oracle': 5}),
         dbc.Row(
             [
                 dbc.Col(
                     dcc.Graph(id="revenue_chart"),
-                    width=12,
+                    width=9,
+                ),
+                dbc.Col(
+                    [
+                        html.H4("Total Revenue and User Base Per Year"),
+                        html.Div(id="revenue_user_display"),
+                    ],
+                    width=3,
                 ),
             ],
             style={"height": "50%"}
         ),
         dbc.Row(
             [
-                dbc.Col(
-                    [
-                        html.H3("Year 1 Parameters"),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("User Base")),
-                                dbc.Col(dbc.Input(id="year1_user_base", type="number", value=1000, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Basic Free Tier (%)")),
-                                dbc.Col(dbc.Input(id="basic_tier1", type="number", value=85, min=0, max=100)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Curious Tier (%)")),
-                                dbc.Col(dbc.Input(id="curious_tier1", type="number", value=10, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Oracle Tier (%)")),
-                                dbc.Col(dbc.Input(id="oracle_tier1", type="number", value=5, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPC (€/click)")),
-                                dbc.Col(dbc.Input(id="cpc1", type="number", value=0.5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPM (€/1000 impressions)")),
-                                dbc.Col(dbc.Input(id="cpm1", type="number", value=5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CTR (%)")),
-                                dbc.Col(dbc.Input(id="ctr1", type="number", value=1, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("ARPU (€/user/month)")),
-                                dbc.Col(dbc.Input(id="arpu1", type="number", value=0.75, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                    ],
-                    width=2,
-                ),
-                dbc.Col(
-                    [
-                        html.H3("Year 2 Parameters"),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Growth (%)")),
-                                dbc.Col(dbc.Input(id="year2_growth", type="number", value=10, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Basic Free Tier (%)")),
-                                dbc.Col(dbc.Input(id="basic_tier2", type="number", value=85, min=0, max=100)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Curious Tier (%)")),
-                                dbc.Col(dbc.Input(id="curious_tier2", type="number", value=10, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Oracle Tier (%)")),
-                                dbc.Col(dbc.Input(id="oracle_tier2", type="number", value=5, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPC (€/click)")),
-                                dbc.Col(dbc.Input(id="cpc2", type="number", value=0.5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPM (€/1000 impressions)")),
-                                dbc.Col(dbc.Input(id="cpm2", type="number", value=5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CTR (%)")),
-                                dbc.Col(dbc.Input(id="ctr2", type="number", value=1, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("ARPU (€/user/month)")),
-                                dbc.Col(dbc.Input(id="arpu2", type="number", value=0.75, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                    ],
-                    width=2,
-                ),
-                # Repeat similar structure for Year 3 to Year 5
-                dbc.Col(
-                    [
-                        html.H3("Year 3 Parameters"),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Growth (%)")),
-                                dbc.Col(dbc.Input(id="year3_growth", type="number", value=10, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Basic Free Tier (%)")),
-                                dbc.Col(dbc.Input(id="basic_tier3", type="number", value=85, min=0, max=100)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Curious Tier (%)")),
-                                dbc.Col(dbc.Input(id="curious_tier3", type="number", value=10, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Oracle Tier (%)")),
-                                dbc.Col(dbc.Input(id="oracle_tier3", type="number", value=5, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPC (€/click)")),
-                                dbc.Col(dbc.Input(id="cpc3", type="number", value=0.5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPM (€/1000 impressions)")),
-                                dbc.Col(dbc.Input(id="cpm3", type="number", value=5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CTR (%)")),
-                                dbc.Col(dbc.Input(id="ctr3", type="number", value=1, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("ARPU (€/user/month)")),
-                                dbc.Col(dbc.Input(id="arpu3", type="number", value=0.75, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                    ],
-                    width=2,
-                ),
-                dbc.Col(
-                    [
-                        html.H3("Year 4 Parameters"),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Growth (%)")),
-                                dbc.Col(dbc.Input(id="year4_growth", type="number", value=10, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Basic Free Tier (%)")),
-                                dbc.Col(dbc.Input(id="basic_tier4", type="number", value=85, min=0, max=100)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Curious Tier (%)")),
-                                dbc.Col(dbc.Input(id="curious_tier4", type="number", value=10, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Oracle Tier (%)")),
-                                dbc.Col(dbc.Input(id="oracle_tier4", type="number", value=5, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPC (€/click)")),
-                                dbc.Col(dbc.Input(id="cpc4", type="number", value=0.5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPM (€/1000 impressions)")),
-                                dbc.Col(dbc.Input(id="cpm4", type="number", value=5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CTR (%)")),
-                                dbc.Col(dbc.Input(id="ctr4", type="number", value=1, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("ARPU (€/user/month)")),
-                                dbc.Col(dbc.Input(id="arpu4", type="number", value=0.75, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                    ],
-                    width=2,
-                ),
-                dbc.Col(
-                    [
-                        html.H3("Year 5 Parameters"),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Growth (%)")),
-                                dbc.Col(dbc.Input(id="year5_growth", type="number", value=10, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Basic Free Tier (%)")),
-                                dbc.Col(dbc.Input(id="basic_tier5", type="number", value=85, min=0, max=100)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Curious Tier (%)")),
-                                dbc.Col(dbc.Input(id="curious_tier5", type="number", value=10, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("Oracle Tier (%)")),
-                                dbc.Col(dbc.Input(id="oracle_tier5", type="number", value=5, min=2, max=15)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPC (€/click)")),
-                                dbc.Col(dbc.Input(id="cpc5", type="number", value=0.5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CPM (€/1000 impressions)")),
-                                dbc.Col(dbc.Input(id="cpm5", type="number", value=5, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("CTR (%)")),
-                                dbc.Col(dbc.Input(id="ctr5", type="number", value=1, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                        dbc.Row(
-                            [
-                                dbc.Col(html.Label("ARPU (€/user/month)")),
-                                dbc.Col(dbc.Input(id="arpu5", type="number", value=0.75, min=0)),
-                            ],
-                            className="mb-3",
-                        ),
-                    ],
-                    width=2,
-                ),
+                dbc.Col(create_year_parameters(1, user_base=True), width=2, className="border-end"),
+                dbc.Col(create_year_parameters(2), width=2, className="border-end"),
+                dbc.Col(create_year_parameters(3), width=2, className="border-end"),
+                dbc.Col(create_year_parameters(4), width=2, className="border-end"),
+                dbc.Col(create_year_parameters(5), width=2, className="border-end"),
+                dbc.Col(create_metric_explanation(), width=2),
             ],
             style={"height": "50%"}
         ),
@@ -342,12 +132,10 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
-
-
-
 # Define callback to update the chart
+# Define callback to update the chart and revenue/user display
 @app.callback(
-    Output("revenue_chart", "figure"),
+    [Output("revenue_chart", "figure"), Output("revenue_user_display", "children")],
     [
         Input("year1_user_base", "value"),
         Input("year2_growth", "value"),
@@ -454,16 +242,13 @@ def update_chart(
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
     # Add bars for subscription tiers and ad revenue
-    fig.add_trace(go.Bar(name="Basic Users", x=years, y=basic_users, text=basic_users, textposition='auto'), secondary_y=False)
-    fig.add_trace(go.Bar(name="Curious Users", x=years, y=curious_users, text=curious_users, textposition='auto'), secondary_y=False)
-    fig.add_trace(go.Bar(name="Oracle Users", x=years, y=oracle_users, text=oracle_users, textposition='auto'), secondary_y=False)
-    fig.add_trace(go.Bar(name="Ad Revenue", x=years, y=ad_revenue, text=ad_revenue, textposition='auto'), secondary_y=False)
+    fig.add_trace(go.Bar(name="Basic Users", x=years, y=basic_users, text=basic_users, textposition='inside', insidetextanchor='middle'), secondary_y=False)
+    fig.add_trace(go.Bar(name="Curious Users", x=years, y=curious_users, text=curious_users, textposition='inside', insidetextanchor='middle'), secondary_y=False)
+    fig.add_trace(go.Bar(name="Oracle Users", x=years, y=oracle_users, text=oracle_users, textposition='inside', insidetextanchor='middle'), secondary_y=False)
+    fig.add_trace(go.Bar(name="Ad Revenue", x=years, y=ad_revenue, text=ad_revenue, textposition='inside', insidetextanchor='middle'), secondary_y=False)
     
-    # Add line for total revenue
-    fig.add_trace(go.Scatter(name="Total Revenue", x=years, y=total_revenue, mode='lines+markers', line=dict(color='black')), secondary_y=True)
-
-    # Add line for user base
-    fig.add_trace(go.Scatter(name="Total Users", x=years, y=user_base, mode='lines+markers', line=dict(color='blue')), secondary_y=True)
+    # Add single line for total revenue
+    fig.add_trace(go.Scatter(name="Total Revenue", x=years, y=total_revenue, mode='lines+markers+text', text=[f"€{x:.2f}" for x in total_revenue], textposition='top right', line=dict(color='black')), secondary_y=True)
 
     # Update layout
     fig.update_layout(
@@ -474,7 +259,13 @@ def update_chart(
         yaxis2={"title": "Total Users"},
     )
 
-    return fig
+    # Create revenue and user display
+    revenue_user_display = [
+        html.P(f"Year {i+1}: Total Revenue: €{total_revenue[i]:,.2f}, Total Users: {int(user_base[i])}")
+        for i in range(5)
+    ]
+
+    return fig, revenue_user_display
 
 # Run the app
 if __name__ == "__main__":
