@@ -79,7 +79,7 @@ print(f"Mean Area: {mean_area:.2f} m²")
 print(f"Total Buildings: {num_buildings}")
 
 # Save DataFrame to Excel
-df.to_excel("office_listings.xlsx", index=False)
+df.to_excel("output/office_listings.xlsx", index=False)
 
 # Scatter plot of metres squared vs. price per month with line of best fit
 plt.figure(figsize=(10, 6))

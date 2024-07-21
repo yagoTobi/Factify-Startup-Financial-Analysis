@@ -190,8 +190,6 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
-
-# Define callback to update the chart
 # Define callback to update the chart and revenue/user display
 @app.callback(
     [Output("revenue_chart", "figure"), Output("revenue_user_display", "children")],
