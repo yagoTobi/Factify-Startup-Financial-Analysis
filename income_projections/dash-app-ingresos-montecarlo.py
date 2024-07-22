@@ -6,12 +6,11 @@ import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
 from plotly.subplots import make_subplots
-import io
-from dash import dcc
 
 # Initialize the app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+# Helper function
 def monte_carlo_simulation(num_simulations):
     # Parameter distributions
     user_base_dist = np.random.uniform(50000, 100000, num_simulations)
@@ -83,6 +82,7 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+# Define callback
 @app.callback(
     [Output("revenue_chart", "figure"), Output("simulation_data_display", "children")],
     Input("btn_run_simulations", "n_clicks"),
@@ -151,7 +151,6 @@ def run_monte_carlo_simulations(n_clicks):
         hover=True,
         responsive=True
     )
-
 
     return fig, simulation_data_display
 
