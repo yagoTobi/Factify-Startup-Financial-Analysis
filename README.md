@@ -1,6 +1,6 @@
 # Factify Financial Analytics Project
 
-(Final thesis paper)[https://drive.google.com/file/d/1r8V21Qn4XFYtZiOXYjLNkF7kbx60qgu5/view?usp=sharing]
+[Final thesis paper - PDF](https://drive.google.com/file/d/1r8V21Qn4XFYtZiOXYjLNkF7kbx60qgu5/view?usp=sharing)
 
 ## Project Overview
 This repository contains the financial analytics and data-driven approach to assess the potential costs and income of Factify, a startup in the ideation phase. This project was completed as part of a final thesis for a business analytics degree.
